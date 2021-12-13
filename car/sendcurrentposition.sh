@@ -22,12 +22,12 @@ gpsdata=$( gpspipe -w -n 10 | grep -m 1 lat )
  moved=$(echo "scale=9; latdiff=(($lat-$lastlat)^2); londiff=(($lon-$lastlon)^2); latdiff || londiff " | bc -l)
 
 # Assemble data string
-gpsstring=$(echo "-F 'dtg=$dtg' -F 'veh=$veh' -F 'lat=$lat' -F 'lon=$lon' -F 'spd=$spd' -F 'trk=$trk'")
+gpsstring=$(echo "-F dtg=$dtg -F veh=$veh -F lat=$lat -F lon=$lon -F spd=$spd -F trk=$trk")
 
 # If vehicle has moved then send the new position to server and update lastlat and lastlon files
  if [ $moved -ne 0 ]
   then
-   curl -o sendcurrentposition.log -X POST $gpsstring https://[yourservergoeshere]/update.php
+   curl -s -o sendcurrentposition.log -X POST $gpsstring https://[yourservergoeshere]/update.php
    echo $lat > lastlat
    echo $lon > lastlon
   fi
