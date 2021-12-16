@@ -13,9 +13,12 @@ gpsdata=$( gpspipe -w -n 10 | grep -m 1 lat )
  dtg=$( echo $gpsdata | jq '.time' | tr -d '"' )
 
 # Check if vehicle has moved >10m since last transmission
- # Read last transmitted lat and lon from file
- if [ -f "lastlat" ]; then lastlat=$(cat lastlat); else lastlat=0; fi
- if [ -f "lastlon" ]; then lastlon=$(cat lastlon); else lastlon=0; fi
+ # Read last transmitted lat and lon from file, if they exist and are non-empty
+ if [ -s "lastlat" ]; then lastlat=$(cat lastlat); else lastlat=0; fi
+ if [ -s "lastlon" ]; then lastlon=$(cat lastlon); else lastlon=0; fi
+ # Check that lastlat, lastlon are numbers (i.e. 0).  If not, set to 0.  Comparison fails for non-integers (i.e. good lat/long)
+ if [ $lastlat -ne $lastlat ] 2>/dev/null; then lastlat=0; fi
+ if [ $lastlon -ne $lastlon ] 2>/dev/null; then lastlon=0; fi
  # 10m roughly corresponds to 10^-5 degrees of latitude.  Assume same for longitude at mid latitudes.
  # Take differences of lat and long, square both with 10^-9 precision to make positive.
  # XOR outputs 0 if unmoved in lat and long, anything else has moved.
